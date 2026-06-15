@@ -141,6 +141,8 @@ class StatHudHeader extends StatelessWidget {
                   Text(
                     'Next Lvl: $commitsNeeded commits needed',
                     style: TextStyle(
+                      color: neonMagenta.withOpacity(0.8),
+
                       fontSize: 10,
                     ),
                     overflow: TextOverflow.ellipsis,
