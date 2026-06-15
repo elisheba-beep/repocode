@@ -25,7 +25,7 @@ class AuthService {
     final response = await http.post(
       Uri.parse('https://github.com/login/device/code'),
       headers: {'Accept': 'application/json'},
-      body: {'client_id': _clientId},
+      body: {'client_id': _clientId, 'scope': 'repo'},
     );
     final data = jsonDecode(response.body);
     if (data.containsKey('error')) {

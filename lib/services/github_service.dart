@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:io';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'auth_service.dart';
@@ -123,20 +125,36 @@ class GitHubService {
       'sha': sha,
     });
 
-    final response = await http.put(
-      Uri.parse('https://api.github.com/repos/$repoFullName/contents/$path'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Accept': 'application/vnd.github.v3+json',
-        'Content-Type': 'application/json',
-      },
-      body: body,
-    );
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      final data = jsonDecode(response.body);
-      return data['content']['sha'];
-    } else {
-      throw Exception('Failed to commit: ${response.body}');
+    try {
+      final response = await http
+          .put(
+            Uri.parse(
+              'https://api.github.com/repos/$repoFullName/contents/$path',
+            ),
+            headers: {
+              'Authorization': 'Bearer $token',
+              'Accept': 'application/vnd.github.v3+json',
+              'Content-Type': 'application/json',
+            },
+            body: body,
+          )
+          .timeout(const Duration(seconds: 30));
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = jsonDecode(response.body);
+        return data['content']['sha'];
+      } else {
+        throw Exception('Failed to commit: ${response.body}');
+      }
+    } on SocketException catch (_) {
+      throw Exception('UPLINK SEVERED: Network connection dropped.');
+    } on TimeoutException catch (_) {
+      throw Exception('REQUEST TIMEOUT: GitHub API took too long to respond.');
+    } on http.ClientException catch (e) {
+      throw Exception(
+        'NETWORK ERROR: Unable to communicate with the GitHub databanks (${e.message}).',
+      );
+    } catch (e) {
+      throw Exception('DEPLOY FAILED: $e');
     }
   }
 }

@@ -33,7 +33,6 @@ class GamifiedSidebar extends StatelessWidget {
     return Container(
       width: 250,
       color: cyberPanel,
-      border: const Border(right: BorderSide(color: Colors.white12)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

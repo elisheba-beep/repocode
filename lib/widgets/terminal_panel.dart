@@ -1,10 +1,28 @@
 import 'package:flutter/material.dart';
 import '../../theme/cyber_theme.dart';
 
-class TerminalPanel extends StatelessWidget {
+class TerminalPanel extends StatefulWidget {
   final List<String> logs;
+  final Function(String)? onCommand;
 
-  const TerminalPanel({super.key, required this.logs});
+  const TerminalPanel({super.key, required this.logs, this.onCommand});
+
+  @override
+  State<TerminalPanel> createState() => _TerminalPanelState();
+}
+
+class _TerminalPanelState extends State<TerminalPanel> {
+  final TextEditingController _controller = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _focusNode.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,12 +46,16 @@ class TerminalPanel extends StatelessWidget {
               children: [
                 Expanded(
                   child: ListView.builder(
-                    itemCount: logs.length,
+                    reverse: true, // Flips the list upside down!
+                    controller: _scrollController,
+                    itemCount: widget.logs.length,
                     itemBuilder: (context, index) {
+                      // Because the list is upside down, we must read the logs backwards
+                      final logIndex = widget.logs.length - 1 - index;
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 4.0),
-                        child: Text(
-                          logs[index],
+                        child: SelectableText(
+                          widget.logs[logIndex],
                           style: TextStyle(
                             color: terminalGreen.withOpacity(0.8),
                             fontFamily: 'Courier',
@@ -46,10 +68,29 @@ class TerminalPanel extends StatelessWidget {
                 Row(
                   children: [
                     Text('C:\\SYS_ROOT> ', style: glowingText(terminalGreen)),
-                    Container(
-                      width: 10,
-                      height: 16,
-                      color: terminalGreen.withOpacity(0.8),
+                    Expanded(
+                      child: TextField(
+                        controller: _controller,
+                        focusNode: _focusNode,
+                        style: TextStyle(
+                          color: terminalGreen.withOpacity(0.8),
+                          fontFamily: 'Courier',
+                        ),
+                        decoration: const InputDecoration(
+                          border: InputBorder.none,
+                          isDense: true,
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                        cursorColor: terminalGreen,
+                        onSubmitted: (value) {
+                          if (value.trim().isNotEmpty &&
+                              widget.onCommand != null) {
+                            widget.onCommand!(value);
+                          }
+                          _controller.clear();
+                          _focusNode.requestFocus();
+                        },
+                      ),
                     ),
                   ],
                 ),

@@ -14,6 +14,7 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'RepoCode Editor',
       theme: ThemeData.dark().copyWith(primaryColor: Colors.blueAccent),
       home: const LoginScreen(),

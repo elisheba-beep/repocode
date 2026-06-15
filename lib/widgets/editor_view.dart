@@ -35,6 +35,11 @@ class EditorView extends StatelessWidget {
           value: '// Select a file from the databanks to begin.',
           language: 'javascript', theme: 'vs-dark', automaticLayout: true, minimap: { enabled: false }
         });
+        editor.onDidChangeModelContent(function() {
+          if (window.flutter_inappwebview && window.flutter_inappwebview.callHandler) {
+            window.flutter_inappwebview.callHandler('onContentChanged', editor.getValue());
+          }
+        });
       });
       function setContent(content, lang) {
         if(editor) { monaco.editor.setModelLanguage(editor.getModel(), lang); editor.setValue(content); }
@@ -108,7 +113,9 @@ class EditorView extends StatelessWidget {
                     right: 24,
                     child: InkWell(
                       onTap: () async {
-                        String commitMsg = currentFile != null ? 'Update ${currentFile!['name']}' : '';
+                        String commitMsg = currentFile != null
+                            ? 'Update ${currentFile!['name']}'
+                            : '';
 
                         showDialog(
                           context: context,
