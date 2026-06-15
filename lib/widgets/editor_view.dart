@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import '../../theme/cyber_theme.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import '../../utils/monaco_html.dart';
 
 class EditorView extends StatelessWidget {
   final Map<String, dynamic>? currentFile;
   final List<Map<String, dynamic>> openFiles;
+  final Map<String, dynamic> modifiedFiles;
   final int playerXp;
   final Function(InAppWebViewController) onWebViewCreated;
   final Function(String content, String message) onDeploy;
@@ -16,6 +18,7 @@ class EditorView extends StatelessWidget {
     super.key,
     required this.currentFile,
     required this.openFiles,
+    required this.modifiedFiles,
     required this.playerXp,
     required this.onWebViewCreated,
     required this.onDeploy,
@@ -39,7 +42,7 @@ class EditorView extends StatelessWidget {
       require(['vs/editor/editor.main'], function() {
         editor = monaco.editor.create(document.getElementById('container'), {
           value: '// Select a file from the databanks to begin.',
-          language: 'javascript', theme: 'vs-dark', automaticLayout: true, minimap: { enabled: false }
+          language: 'javascript', theme: 'vs-dark', automaticLayout: true, minimap: { enabled: true }
         });
         editor.onDidChangeModelContent(function() {
           if (window.flutter_inappwebview && window.flutter_inappwebview.callHandler) {
@@ -100,6 +103,7 @@ class EditorView extends StatelessWidget {
 
                 final file = openFiles[index];
                 final isActive = currentFile?['path'] == file['path'];
+                final isModified = modifiedFiles.containsKey(file['path']);
 
                 return InkWell(
                   onTap: () => onFileSwitched(file),
@@ -127,6 +131,14 @@ class EditorView extends StatelessWidget {
                                 : FontWeight.normal,
                           ),
                         ),
+                        if (isModified) ...[
+                          const SizedBox(width: 6),
+                          const Icon(
+                            Icons.circle,
+                            color: Colors.amberAccent,
+                            size: 8,
+                          ),
+                        ],
                         const SizedBox(width: 8),
                         InkWell(
                           onTap: () => onFileClosed(file),
@@ -155,7 +167,7 @@ class EditorView extends StatelessWidget {
                 ),
 
                 InAppWebView(
-                  initialData: InAppWebViewInitialData(data: _monacoHtml),
+                  initialData: InAppWebViewInitialData(data: monacoHtml),
                   initialSettings: InAppWebViewSettings(
                     transparentBackground: true,
                   ),

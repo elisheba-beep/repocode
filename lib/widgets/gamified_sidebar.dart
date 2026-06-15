@@ -138,23 +138,56 @@ class GamifiedSidebar extends StatelessWidget {
   }
 
   Widget _buildExtensionNode(dynamic item) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.white10)),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.extension, color: terminalGreen, size: 18),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              item,
-              style: const TextStyle(color: Colors.white70),
-              overflow: TextOverflow.ellipsis,
+    final bool isInstalled = item['installed'] ?? false;
+    final String name = item['name'];
+    final String desc = item['description'] ?? '';
+
+    return InkWell(
+      onTap: () => onItemTap(item),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: const BoxDecoration(
+          border: Border(bottom: BorderSide(color: Colors.white10)),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.extension,
+              color: isInstalled ? terminalGreen : Colors.white30,
+              size: 18,
             ),
-          ),
-        ],
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    style: TextStyle(
+                      color: isInstalled ? Colors.white70 : Colors.white30,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (desc.isNotEmpty)
+                    Text(
+                      desc,
+                      style: TextStyle(
+                        color: isInstalled ? Colors.white54 : Colors.white24,
+                        fontSize: 10,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                ],
+              ),
+            ),
+            Icon(
+              isInstalled ? Icons.toggle_on : Icons.toggle_off,
+              color: isInstalled ? terminalGreen : Colors.white30,
+              size: 28,
+            ),
+          ],
+        ),
       ),
     );
   }

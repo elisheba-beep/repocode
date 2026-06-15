@@ -30,6 +30,46 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
+  Future<void> _handleFileClose(Map<String, dynamic> file) async {
+    final path = file['path'];
+    if (_controller.editor.modifiedFiles.containsKey(path)) {
+      final confirm = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          backgroundColor: cyberPanel,
+          title: Text(
+            'UNSAVED CHANGES',
+            style: glowingText(Colors.amberAccent),
+          ),
+          content: const Text(
+            'WARNING: You have uncommitted changes in this file. Closing it will discard your modifications. Proceed?',
+            style: TextStyle(
+              color: Colors.white70,
+              fontFamily: 'Courier',
+              height: 1.5,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('CANCEL', style: TextStyle(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: neonMagenta),
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text(
+                'DISCARD',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
+        ),
+      );
+      if (confirm != true) return;
+    }
+    await _controller.editor.closeFile(file);
+  }
+
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
@@ -40,11 +80,11 @@ class _HomeScreenState extends State<HomeScreen> {
           body: Column(
             children: [
               StatHudHeader(
-                username: _controller.username,
-                totalCommits: _controller.totalCommits,
-                integrityPercentage: _controller.integrity,
+                username: _controller.github.username,
+                totalCommits: _controller.github.totalCommits,
+                integrityPercentage: _controller.github.integrity,
                 onLogout: () async {
-                  await _controller.logout();
+                  await _controller.github.logout();
                   if (context.mounted) {
                     Navigator.pushReplacement(
                       context,
@@ -58,16 +98,16 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     ActivityBar(
                       activeTab: _controller.activeSidebarTab,
-                      modifiedCount: _controller.modifiedFiles.length,
+                      modifiedCount: _controller.editor.modifiedFiles.length,
                       onTabSelected: _controller.setTab,
                     ),
                     if (_controller.isSidebarOpen)
                       GamifiedSidebar(
                         activeTab: _controller.activeSidebarTab,
                         items: _controller.currentSidebarItems,
-                        isShowingRepos: _controller.showingRepos,
-                        currentRepo: _controller.currentRepo,
-                        onBack: _controller.handleBack,
+                        isShowingRepos: _controller.github.showingRepos,
+                        currentRepo: _controller.github.currentRepo,
+                        onBack: _controller.github.handleBack,
                         onItemTap: _controller.handleSidebarTap,
                       ),
                     Expanded(
@@ -76,32 +116,36 @@ class _HomeScreenState extends State<HomeScreen> {
                           Expanded(
                             flex: 7,
                             child: EditorView(
-                              currentFile: _controller.currentFile,
-                              openFiles: _controller.openFiles,
-                              playerXp: _controller.playerXp,
+                              currentFile: _controller.editor.currentFile,
+                              openFiles: _controller.editor.openFiles,
+                              modifiedFiles: _controller.editor.modifiedFiles,
+                              playerXp: _controller.github.playerXp,
                               onWebViewCreated: (webViewController) {
-                                _controller.webViewController =
-                                    webViewController;
+                                _controller.editor.attachWebView(
+                                  webViewController,
+                                );
                                 webViewController.addJavaScriptHandler(
                                   handlerName: 'onContentChanged',
                                   callback: (args) {
                                     if (args.isNotEmpty) {
-                                      _controller.onContentChanged(
+                                      _controller.editor.onContentChanged(
                                         args[0].toString(),
                                       );
                                     }
                                   },
                                 );
                               },
-                              onDeploy: _controller.commitChanges,
-                              onContentChanged: _controller.onContentChanged,
-                              onFileSwitched: _controller.switchFile,
-                              onFileClosed: _controller.closeFile,
+                              onDeploy: _controller.editor.commitChanges,
+                              onContentChanged:
+                                  _controller.editor.onContentChanged,
+                              onFileSwitched: _controller.editor.switchFile,
+                              onFileClosed: _handleFileClose,
                             ),
                           ),
                           TerminalPanel(
-                            logs: _controller.terminalLogs.toList(),
-                            onCommand: _controller.handleTerminalCommand,
+                            prompt: _controller.getTerminalPrompt(),
+                            logs: _controller.terminal.logs.toList(),
+                            onCommand: _controller.onTerminalCommand,
                           ),
                         ],
                       ),

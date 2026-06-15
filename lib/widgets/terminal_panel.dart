@@ -4,8 +4,14 @@ import '../../theme/cyber_theme.dart';
 class TerminalPanel extends StatefulWidget {
   final List<String> logs;
   final Function(String)? onCommand;
+  final String prompt;
 
-  const TerminalPanel({super.key, required this.logs, this.onCommand});
+  const TerminalPanel({
+    super.key,
+    required this.logs,
+    this.onCommand,
+    this.prompt = 'C:\\SYS_ROOT> ',
+  });
 
   @override
   State<TerminalPanel> createState() => _TerminalPanelState();
@@ -67,7 +73,7 @@ class _TerminalPanelState extends State<TerminalPanel> {
                 ),
                 Row(
                   children: [
-                    Text('C:\\SYS_ROOT> ', style: glowingText(terminalGreen)),
+                    Text(widget.prompt, style: glowingText(terminalGreen)),
                     Expanded(
                       child: TextField(
                         controller: _controller,
