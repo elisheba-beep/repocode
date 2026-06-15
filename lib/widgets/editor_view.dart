@@ -4,17 +4,23 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 class EditorView extends StatelessWidget {
   final Map<String, dynamic>? currentFile;
+  final List<Map<String, dynamic>> openFiles;
   final int playerXp;
   final Function(InAppWebViewController) onWebViewCreated;
   final Function(String content, String message) onDeploy;
   final Function(String content)? onContentChanged;
+  final Function(Map<String, dynamic>) onFileSwitched;
+  final Function(Map<String, dynamic>) onFileClosed;
 
   const EditorView({
     super.key,
     required this.currentFile,
+    required this.openFiles,
     required this.playerXp,
     required this.onWebViewCreated,
     required this.onDeploy,
+    required this.onFileSwitched,
+    required this.onFileClosed,
     this.onContentChanged,
   });
 
@@ -57,22 +63,6 @@ class EditorView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Active Tab
-          Container(
-            color: cyberPanel,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Row(
-              children: [
-                Text(
-                  currentFile?['name'] ?? 'NO_FILE_SELECTED',
-                  style: glowingText(neonCyan),
-                ),
-                const SizedBox(width: 12),
-                const Icon(Icons.close, color: Colors.white54, size: 16),
-              ],
-            ),
-          ),
-
           // XP Progression Bar
           Container(
             height: 4,
@@ -85,6 +75,72 @@ class EditorView extends StatelessWidget {
               value: (playerXp % 1000) / 1000.0,
               backgroundColor: cyberPanel,
               valueColor: const AlwaysStoppedAnimation<Color>(neonCyan),
+            ),
+          ),
+
+          // Active Tab
+          Container(
+            height: 48,
+            color: cyberBg,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: openFiles.isEmpty ? 1 : openFiles.length,
+              itemBuilder: (context, index) {
+                if (openFiles.isEmpty) {
+                  return Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    alignment: Alignment.center,
+                    color: cyberPanel,
+                    child: Text(
+                      'NO_FILE_SELECTED',
+                      style: glowingText(Colors.white54),
+                    ),
+                  );
+                }
+
+                final file = openFiles[index];
+                final isActive = currentFile?['path'] == file['path'];
+
+                return InkWell(
+                  onTap: () => onFileSwitched(file),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: isActive ? cyberPanel : Colors.black26,
+                      border: Border(
+                        bottom: BorderSide(
+                          color: isActive ? neonCyan : Colors.transparent,
+                          width: 2,
+                        ),
+                        right: const BorderSide(color: Colors.white10),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Text(
+                          file['name'],
+                          style: TextStyle(
+                            color: isActive ? neonCyan : Colors.white54,
+                            fontWeight: isActive
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        InkWell(
+                          onTap: () => onFileClosed(file),
+                          child: Icon(
+                            Icons.close,
+                            color: isActive ? Colors.white : Colors.white54,
+                            size: 16,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
           ),
 

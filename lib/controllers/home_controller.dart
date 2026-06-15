@@ -14,6 +14,8 @@ class HomeController extends ChangeNotifier {
   bool isSidebarOpen = true;
   List<dynamic> sidebarItems = [];
   Map<String, String> originalContents = {};
+  Map<String, String> workingContents = {};
+  List<Map<String, dynamic>> openFiles = [];
   Map<String, dynamic> modifiedFiles = {};
   bool showingRepos = true;
   String? currentRepo;
@@ -90,37 +92,88 @@ class HomeController extends ChangeNotifier {
   }
 
   Future<void> openFile(Map<String, dynamic> file) async {
+    final path = file['path'];
+    if (openFiles.any((f) => f['path'] == path)) {
+      await switchFile(openFiles.firstWhere((f) => f['path'] == path));
+      return;
+    }
+
     _log('> Decrypting file: ${file['name']}...');
     try {
       String content = await _gitHubService.getFileContent(file['url']);
       content = content.replaceAll('\r', '');
+
+      originalContents[path] = content;
+      workingContents[path] = content;
+      openFiles.add(file);
       currentFile = file;
-      originalContents[file['path']] = content;
       notifyListeners();
 
-      if (webViewController != null) {
-        String lang = 'javascript';
-        if (file['name'].endsWith('.dart')) lang = 'dart';
-        if (file['name'].endsWith('.py')) lang = 'python';
-        if (file['name'].endsWith('.html')) lang = 'html';
-
-        final escapedContent = content
-            .replaceAll(r'\', r'\\')
-            .replaceAll("'", r"\'")
-            .replaceAll('\n', r'\n');
-        await webViewController!.evaluateJavascript(
-          source: "setContent('$escapedContent', '$lang')",
-        );
-        _log('> File decrypted successfully.');
-      }
+      await _injectFileToMonaco(file);
+      _log('> File decrypted successfully.');
     } catch (e) {
       _log('> ERROR: File corruption detected - $e');
     }
   }
 
+  Future<void> switchFile(Map<String, dynamic> file) async {
+    if (currentFile?['path'] == file['path']) return;
+    currentFile = file;
+    notifyListeners();
+    await _injectFileToMonaco(file);
+  }
+
+  Future<void> closeFile(Map<String, dynamic> file) async {
+    final path = file['path'];
+    openFiles.removeWhere((f) => f['path'] == path);
+    originalContents.remove(path);
+    workingContents.remove(path);
+    modifiedFiles.remove(path);
+
+    if (currentFile?['path'] == path) {
+      if (openFiles.isNotEmpty) {
+        await switchFile(openFiles.last);
+      } else {
+        currentFile = null;
+        notifyListeners();
+        if (webViewController != null) {
+          await webViewController!.evaluateJavascript(
+            source:
+                "setContent('// Select a file from the databanks to begin.', 'javascript')",
+          );
+        }
+      }
+    } else {
+      notifyListeners();
+    }
+  }
+
+  Future<void> _injectFileToMonaco(Map<String, dynamic> file) async {
+    if (webViewController == null) return;
+
+    String lang = 'javascript';
+    if (file['name'].endsWith('.dart')) lang = 'dart';
+    if (file['name'].endsWith('.py')) lang = 'python';
+    if (file['name'].endsWith('.html')) lang = 'html';
+
+    String content =
+        workingContents[file['path']] ?? originalContents[file['path']] ?? '';
+
+    final escapedContent = content
+        .replaceAll(r'\', r'\\')
+        .replaceAll("'", r"\'")
+        .replaceAll('\n', r'\n');
+
+    await webViewController!.evaluateJavascript(
+      source: "setContent('$escapedContent', '$lang')",
+    );
+  }
+
   void onContentChanged(String newContent) {
     if (currentFile == null) return;
     final path = currentFile!['path'];
+    workingContents[path] = newContent;
+
     final original = originalContents[path];
 
     final wasModified = modifiedFiles.containsKey(path);
@@ -159,6 +212,7 @@ class HomeController extends ChangeNotifier {
 
       currentFile!['sha'] = newSha;
       originalContents[currentFile!['path']] = newContent;
+      workingContents[currentFile!['path']] = newContent;
       playerXp += 50;
       totalCommits += 1;
       modifiedFiles.remove(currentFile!['path']);
@@ -179,7 +233,7 @@ class HomeController extends ChangeNotifier {
   Future<void> handleTerminalCommand(String command) async {
     // Display dynamic directory instead of hardcoded SYS_ROOT
     _log('${_terminalService.currentDirectory}> $command');
-    
+
     final output = await _terminalService.executeCommand(command);
     _log(output);
   }

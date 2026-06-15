@@ -77,6 +77,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             flex: 7,
                             child: EditorView(
                               currentFile: _controller.currentFile,
+                              openFiles: _controller.openFiles,
                               playerXp: _controller.playerXp,
                               onWebViewCreated: (webViewController) {
                                 _controller.webViewController =
@@ -94,6 +95,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               },
                               onDeploy: _controller.commitChanges,
                               onContentChanged: _controller.onContentChanged,
+                              onFileSwitched: _controller.switchFile,
+                              onFileClosed: _controller.closeFile,
                             ),
                           ),
                           TerminalPanel(
