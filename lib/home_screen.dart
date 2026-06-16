@@ -7,6 +7,7 @@ import 'widgets/gamified_sidebar.dart';
 import 'widgets/editor_view.dart';
 import 'widgets/terminal_panel.dart';
 import 'widgets/stat_hud_header.dart';
+import 'widgets/top_navigation_bar.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -70,6 +71,54 @@ class _HomeScreenState extends State<HomeScreen> {
     await _controller.editor.closeFile(file);
   }
 
+  void _showCommandPalette(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: cyberPanel,
+        title: TextField(
+          autofocus: true,
+          style: const TextStyle(color: Colors.white),
+          decoration: const InputDecoration(
+            prefixIcon: Icon(Icons.chevron_right, color: neonCyan),
+            hintText: 'Search or type a command...',
+            hintStyle: TextStyle(color: Colors.white54),
+            enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: neonCyan)),
+            focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: neonCyan)),
+          ),
+          onSubmitted: (val) {
+            Navigator.pop(context);
+            _controller.onTerminalCommand(val);
+          },
+        ),
+        content: SizedBox(
+          width: 500,
+          height: 200,
+          child: ListView(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.rocket_launch, color: neonMagenta),
+                title: const Text('Deploy Code', style: TextStyle(color: Colors.white)),
+                onTap: () {
+                  Navigator.pop(context);
+                  _controller.editor.commitChanges('', 'Command Palette Deploy');
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.clear_all, color: neonCyan),
+                title: const Text('Clear Terminal', style: TextStyle(color: Colors.white)),
+                onTap: () {
+                  Navigator.pop(context);
+                  _controller.onTerminalCommand('clear');
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
@@ -79,6 +128,10 @@ class _HomeScreenState extends State<HomeScreen> {
           backgroundColor: cyberBg,
           body: Column(
             children: [
+              TopNavigationBar(
+                onCommandPalette: () => _showCommandPalette(context),
+                onRunCode: _controller.runCodeSequence,
+              ),
               StatHudHeader(
                 username: _controller.github.username,
                 totalCommits: _controller.github.totalCommits,

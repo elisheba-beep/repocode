@@ -17,7 +17,12 @@ class HomeController extends ChangeNotifier {
     terminal = TerminalController(notifyListeners);
     extensions = ExtensionController(terminal.log, notifyListeners);
     github = GithubController(terminal.log, notifyListeners);
-    editor = EditorController(github, extensions, terminal.log, notifyListeners);
+    editor = EditorController(
+      github,
+      extensions,
+      terminal.log,
+      notifyListeners,
+    );
   }
 
   List<dynamic> get currentSidebarItems {
@@ -34,6 +39,22 @@ class HomeController extends ChangeNotifier {
       activeSidebarTab = index;
     }
     notifyListeners();
+  }
+
+  Future<void> runCodeSequence() async {
+    terminal.log('> INITIATING RUNTIME SEQUENCE...');
+    terminal.log('> Booting isolated container...');
+    await Future.delayed(const Duration(milliseconds: 800));
+    if (editor.currentFile != null) {
+      terminal.log('> Compiling ${editor.currentFile!['name']}...');
+      await Future.delayed(const Duration(seconds: 1));
+      terminal.log('> ERROR: Cloud Runtime not configured for this sector.');
+      terminal.log('> Execution halted. +10 XP for the attempt.');
+      github.playerXp += 10;
+      notifyListeners();
+    } else {
+      terminal.log('> No file selected for execution.');
+    }
   }
 
   String getTerminalPrompt() {
@@ -53,30 +74,43 @@ class HomeController extends ChangeNotifier {
     final args = parts.length > 1 ? parts.sublist(1) : <String>[];
 
     if (github.currentRepo == null && cmd.isNotEmpty) {
-      terminal.log('> ERROR: No repository selected. Navigate via the sidebar first.');
+      terminal.log(
+        '> ERROR: No repository selected. Navigate via the sidebar first.',
+      );
       return;
     }
 
     switch (cmd) {
       case 'ls':
       case 'dir':
-        final items = await github.api.getContents(github.currentRepo!, github.currentPath);
+        final items = await github.api.getContents(
+          github.currentRepo!,
+          github.currentPath,
+        );
         if (items.isEmpty) {
           terminal.log('(empty directory)');
           return;
         }
-        final output = items.map((item) {
-          final type = item['type'] == 'dir' ? '<DIR>' : '     ';
-          return '$type    ${item['name']}';
-        }).join('\n');
+        final output = items
+            .map((item) {
+              final type = item['type'] == 'dir' ? '<DIR>' : '     ';
+              return '$type    ${item['name']}';
+            })
+            .join('\n');
         terminal.log(output);
         break;
       case 'cd':
         if (args.isEmpty || args.first == '..') {
           github.handleBack();
         } else {
-          final currentItems = await github.api.getContents(github.currentRepo!, github.currentPath);
-          final targetDir = currentItems.firstWhere((item) => item['name'] == args.first && item['type'] == 'dir', orElse: () => null);
+          final currentItems = await github.api.getContents(
+            github.currentRepo!,
+            github.currentPath,
+          );
+          final targetDir = currentItems.firstWhere(
+            (item) => item['name'] == args.first && item['type'] == 'dir',
+            orElse: () => null,
+          );
           if (targetDir != null) {
             github.loadContents(github.currentRepo!, targetDir['path']);
           } else {
@@ -93,7 +127,9 @@ class HomeController extends ChangeNotifier {
       case '':
         break; // Do nothing on empty command
       default:
-        terminal.log('> Command not found: $cmd. Supported: ls, dir, cd, clear, cls.');
+        terminal.log(
+          '> Command not found: $cmd. Supported: ls, dir, cd, clear, cls.',
+        );
         break;
     }
   }

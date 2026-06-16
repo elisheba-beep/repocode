@@ -21,7 +21,6 @@ class EditorController {
   void attachWebView(InAppWebViewController controller) {
     webViewController = controller;
     extensions.applyTheme(controller);
-    extensions.applyLinter(controller);
   }
 
   Future<void> openFile(Map<String, dynamic> file) async {
