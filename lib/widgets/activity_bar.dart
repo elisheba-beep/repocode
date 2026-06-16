@@ -27,6 +27,7 @@ class ActivityBar extends StatelessWidget {
             neonPurple,
             'Source Control',
             1,
+            badgeCount: modifiedCount,
           ),
           _buildActivityIcon(
             Icons.extension,
@@ -51,9 +52,9 @@ class ActivityBar extends StatelessWidget {
     IconData icon,
     Color color,
     String tooltip,
-    int index,
-    {int badgeCount = 0}
-  ) {
+    int index, {
+    int badgeCount = 0,
+  }) {
     final isActive = activeTab == index;
     return Tooltip(
       message: tooltip,
@@ -63,7 +64,9 @@ class ActivityBar extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            border: isActive ? Border(left: BorderSide(color: color, width: 3)) : null,
+            border: isActive
+                ? Border(left: BorderSide(color: color, width: 3))
+                : null,
             color: isActive ? color.withOpacity(0.1) : Colors.transparent,
           ),
           child: Stack(
@@ -73,7 +76,9 @@ class ActivityBar extends StatelessWidget {
                 icon,
                 color: isActive ? color : color.withOpacity(0.5),
                 size: 24,
-                shadows: isActive ? [Shadow(color: color.withOpacity(0.8), blurRadius: 10)] : [],
+                shadows: isActive
+                    ? [Shadow(color: color.withOpacity(0.8), blurRadius: 10)]
+                    : [],
               ),
               if (badgeCount > 0)
                 Positioned(
@@ -81,8 +86,18 @@ class ActivityBar extends StatelessWidget {
                   top: -4,
                   child: Container(
                     padding: const EdgeInsets.all(4),
-                    decoration: const BoxDecoration(color: neonMagenta, shape: BoxShape.circle),
-                    child: Text(badgeCount.toString(), style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                    decoration: const BoxDecoration(
+                      color: neonMagenta,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Text(
+                      badgeCount.toString(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ),
             ],

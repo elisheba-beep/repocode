@@ -63,16 +63,35 @@ class GamifiedSidebar extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: ListView.builder(
-              itemCount: items.length,
-              itemBuilder: (context, index) {
-                final item = items[index];
-                if (activeTab == 1) return _buildModifiedNode(item);
-                if (activeTab == 2) return _buildExtensionNode(item);
-                if (activeTab == 3) return _buildSettingNode(item);
-                return _buildNode(item);
-              },
-            ),
+            child: items.isEmpty && activeTab == 1
+                ? SizedBox(
+                    width: double.infinity,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const _PulsingIcon(),
+                        const SizedBox(height: 16),
+                        Text(
+                          'NO PENDING CHANGES',
+                          style: glowingText(
+                            Colors.white30,
+                            weight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : ListView.builder(
+                    itemCount: items.length,
+                    itemBuilder: (context, index) {
+                      final item = items[index];
+                      if (activeTab == 1) return _buildModifiedNode(item);
+                      if (activeTab == 2) return _buildExtensionNode(item);
+                      if (activeTab == 3) return _buildSettingNode(item);
+                      return _buildNode(item);
+                    },
+                  ),
           ),
         ],
       ),
@@ -237,6 +256,52 @@ class GamifiedSidebar extends StatelessWidget {
                 style: const TextStyle(color: neonCyan, fontSize: 12),
               ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PulsingIcon extends StatefulWidget {
+  const _PulsingIcon();
+
+  @override
+  State<_PulsingIcon> createState() => _PulsingIconState();
+}
+
+class _PulsingIconState extends State<_PulsingIcon>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _opacity;
+  late Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    )..repeat(reverse: true);
+    _opacity = Tween<double>(begin: 0.3, end: 1.0).animate(_controller);
+    _scale = Tween<double>(begin: 0.95, end: 1.05).animate(_controller);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _opacity,
+      child: ScaleTransition(
+        scale: _scale,
+        child: const Icon(
+          Icons.check_circle_outline,
+          color: Colors.white24,
+          size: 48,
         ),
       ),
     );
