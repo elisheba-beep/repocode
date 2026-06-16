@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../theme/cyber_theme.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import '../../utils/monaco_html.dart';
+import 'active_editor_overlay.dart';
 
 class EditorView extends StatelessWidget {
   final Map<String, dynamic>? currentFile;
@@ -13,6 +14,8 @@ class EditorView extends StatelessWidget {
   final Function(String content)? onContentChanged;
   final Function(Map<String, dynamic>) onFileSwitched;
   final Function(Map<String, dynamic>) onFileClosed;
+  final bool isActiveEditorEnabled;
+  final VoidCallback onCoinTap;
 
   const EditorView({
     super.key,
@@ -24,6 +27,8 @@ class EditorView extends StatelessWidget {
     required this.onDeploy,
     required this.onFileSwitched,
     required this.onFileClosed,
+    required this.isActiveEditorEnabled,
+    required this.onCoinTap,
     this.onContentChanged,
   });
 
@@ -173,6 +178,9 @@ class EditorView extends StatelessWidget {
                   ),
                   onWebViewCreated: onWebViewCreated,
                 ),
+
+                if (isActiveEditorEnabled)
+                  ActiveEditorOverlay(onCoinTap: onCoinTap),
 
                 // Floating Deploy Action Button
                 if (currentFile != null)

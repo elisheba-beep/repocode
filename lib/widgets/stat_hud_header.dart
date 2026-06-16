@@ -6,6 +6,7 @@ class StatHudHeader extends StatelessWidget {
   final String username;
   final int totalCommits;
   final double integrityPercentage;
+  final int playerXp;
   final VoidCallback onLogout;
 
   const StatHudHeader({
@@ -13,6 +14,7 @@ class StatHudHeader extends StatelessWidget {
     required this.username,
     required this.totalCommits,
     required this.integrityPercentage,
+    required this.playerXp,
     required this.onLogout,
   });
 
@@ -186,6 +188,23 @@ class StatHudHeader extends StatelessWidget {
                     Colors.amberAccent,
                     weight: FontWeight.bold,
                   ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 16),
+
+          // XP Token
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            decoration: glowingBox(terminalGreen, opacity: 0.1),
+            child: Row(
+              children: [
+                const Icon(Icons.star_outline, color: terminalGreen, size: 18),
+                const SizedBox(width: 8),
+                Text(
+                  '$playerXp XP',
+                  style: glowingText(terminalGreen, weight: FontWeight.bold),
                 ),
               ],
             ),

@@ -8,6 +8,7 @@ import 'widgets/editor_view.dart';
 import 'widgets/terminal_panel.dart';
 import 'widgets/stat_hud_header.dart';
 import 'widgets/top_navigation_bar.dart';
+import 'widgets/minigame_overlay.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -83,8 +84,12 @@ class _HomeScreenState extends State<HomeScreen> {
             prefixIcon: Icon(Icons.chevron_right, color: neonCyan),
             hintText: 'Search or type a command...',
             hintStyle: TextStyle(color: Colors.white54),
-            enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: neonCyan)),
-            focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: neonCyan)),
+            enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: neonCyan),
+            ),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: neonCyan),
+            ),
           ),
           onSubmitted: (val) {
             Navigator.pop(context);
@@ -98,15 +103,24 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               ListTile(
                 leading: const Icon(Icons.rocket_launch, color: neonMagenta),
-                title: const Text('Deploy Code', style: TextStyle(color: Colors.white)),
+                title: const Text(
+                  'Deploy Code',
+                  style: TextStyle(color: Colors.white),
+                ),
                 onTap: () {
                   Navigator.pop(context);
-                  _controller.editor.commitChanges('', 'Command Palette Deploy');
+                  _controller.editor.commitChanges(
+                    '',
+                    'Command Palette Deploy',
+                  );
                 },
               ),
               ListTile(
                 leading: const Icon(Icons.clear_all, color: neonCyan),
-                title: const Text('Clear Terminal', style: TextStyle(color: Colors.white)),
+                title: const Text(
+                  'Clear Terminal',
+                  style: TextStyle(color: Colors.white),
+                ),
                 onTap: () {
                   Navigator.pop(context);
                   _controller.onTerminalCommand('clear');
@@ -136,6 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 username: _controller.github.username,
                 totalCommits: _controller.github.totalCommits,
                 integrityPercentage: _controller.github.integrity,
+                playerXp: _controller.github.playerXp,
                 onLogout: () async {
                   await _controller.github.logout();
                   if (context.mounted) {
@@ -147,62 +162,87 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
               ),
               Expanded(
-                child: Row(
+                child: Stack(
                   children: [
-                    ActivityBar(
-                      activeTab: _controller.activeSidebarTab,
-                      modifiedCount: _controller.editor.modifiedFiles.length,
-                      onTabSelected: _controller.setTab,
-                    ),
-                    if (_controller.isSidebarOpen)
-                      GamifiedSidebar(
-                        activeTab: _controller.activeSidebarTab,
-                        items: _controller.currentSidebarItems,
-                        isShowingRepos: _controller.github.showingRepos,
-                        currentRepo: _controller.github.currentRepo,
-                        onBack: _controller.github.handleBack,
-                        onItemTap: _controller.handleSidebarTap,
-                      ),
-                    Expanded(
-                      child: Column(
-                        children: [
-                          Expanded(
-                            flex: 7,
-                            child: EditorView(
-                              currentFile: _controller.editor.currentFile,
-                              openFiles: _controller.editor.openFiles,
-                              modifiedFiles: _controller.editor.modifiedFiles,
-                              playerXp: _controller.github.playerXp,
-                              onWebViewCreated: (webViewController) {
-                                _controller.editor.attachWebView(
-                                  webViewController,
-                                );
-                                webViewController.addJavaScriptHandler(
-                                  handlerName: 'onContentChanged',
-                                  callback: (args) {
-                                    if (args.isNotEmpty) {
-                                      _controller.editor.onContentChanged(
-                                        args[0].toString(),
-                                      );
-                                    }
+                    Row(
+                      children: [
+                        ActivityBar(
+                          activeTab: _controller.activeSidebarTab,
+                          modifiedCount:
+                              _controller.editor.modifiedFiles.length,
+                          onTabSelected: _controller.setTab,
+                        ),
+                        if (_controller.isSidebarOpen)
+                          GamifiedSidebar(
+                            activeTab: _controller.activeSidebarTab,
+                            items: _controller.currentSidebarItems,
+                            isShowingRepos: _controller.github.showingRepos,
+                            currentRepo: _controller.github.currentRepo,
+                            onBack: _controller.github.handleBack,
+                            onItemTap: _controller.handleSidebarTap,
+                          ),
+                        Expanded(
+                          child: Column(
+                            children: [
+                              Expanded(
+                                flex: 7,
+                                child: EditorView(
+                                  currentFile: _controller.editor.currentFile,
+                                  openFiles: _controller.editor.openFiles,
+                                  modifiedFiles:
+                                      _controller.editor.modifiedFiles,
+                                  playerXp: _controller.github.playerXp,
+                                  onWebViewCreated: (webViewController) {
+                                    _controller.editor.attachWebView(
+                                      webViewController,
+                                    );
+                                    webViewController.addJavaScriptHandler(
+                                      handlerName: 'onContentChanged',
+                                      callback: (args) {
+                                        if (args.isNotEmpty) {
+                                          _controller.editor.onContentChanged(
+                                            args[0].toString(),
+                                          );
+                                        }
+                                      },
+                                    );
                                   },
-                                );
-                              },
-                              onDeploy: _controller.editor.commitChanges,
-                              onContentChanged:
-                                  _controller.editor.onContentChanged,
-                              onFileSwitched: _controller.editor.switchFile,
-                              onFileClosed: _handleFileClose,
-                            ),
+                                  onDeploy: _controller.editor.commitChanges,
+                                  onContentChanged:
+                                      _controller.editor.onContentChanged,
+                                  onFileSwitched: _controller.editor.switchFile,
+                                  onFileClosed: _handleFileClose,
+                                  isActiveEditorEnabled:
+                                      _controller.settings.activeEditorEnabled,
+                                  onCoinTap: () {
+                                    _controller.github.addXp(5);
+                                    _controller.terminal.log(
+                                      '> Gamified Editor: +5 XP collected!',
+                                    );
+                                  },
+                                ),
+                              ),
+                              TerminalPanel(
+                                prompt: _controller.getTerminalPrompt(),
+                                logs: _controller.terminal.logs.toList(),
+                                onCommand: _controller.onTerminalCommand,
+                              ),
+                            ],
                           ),
-                          TerminalPanel(
-                            prompt: _controller.getTerminalPrompt(),
-                            logs: _controller.terminal.logs.toList(),
-                            onCommand: _controller.onTerminalCommand,
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
+                    if (_controller.settings.minigameEnabled)
+                      Positioned.fill(
+                        child: MinigameOverlay(
+                          onWin: () {
+                            _controller.github.addXp(100);
+                            _controller.terminal.log(
+                              '> MINIGAME CLEARED: +100 XP!',
+                            );
+                          },
+                        ),
+                      ),
                   ],
                 ),
               ),

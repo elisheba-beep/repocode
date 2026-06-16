@@ -84,6 +84,11 @@ class GithubController {
     notify();
   }
 
+  void addXp(int amount) {
+    playerXp += amount;
+    notify();
+  }
+
   Future<void> logout() async {
     await _authService.logout();
   }

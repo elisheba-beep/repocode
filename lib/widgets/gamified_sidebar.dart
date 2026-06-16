@@ -28,6 +28,8 @@ class GamifiedSidebar extends StatelessWidget {
       title = 'SOURCE CONTROL';
     } else if (activeTab == 2) {
       title = 'EXTENSIONS';
+    } else if (activeTab == 3) {
+      title = 'SETTINGS';
     }
 
     return Container(
@@ -67,6 +69,7 @@ class GamifiedSidebar extends StatelessWidget {
                 final item = items[index];
                 if (activeTab == 1) return _buildModifiedNode(item);
                 if (activeTab == 2) return _buildExtensionNode(item);
+                if (activeTab == 3) return _buildSettingNode(item);
                 return _buildNode(item);
               },
             ),
@@ -186,6 +189,53 @@ class GamifiedSidebar extends StatelessWidget {
               color: isInstalled ? terminalGreen : Colors.white30,
               size: 28,
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSettingNode(dynamic item) {
+    final type = item['type'];
+    final name = item['name'];
+    final value = item['value'];
+
+    return InkWell(
+      onTap: () => onItemTap(item),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: const BoxDecoration(
+          border: Border(bottom: BorderSide(color: Colors.white10)),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              type == 'toggle' ? Icons.gamepad : Icons.palette,
+              color: Colors.white70,
+              size: 18,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                name,
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontWeight: FontWeight.bold,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            if (type == 'toggle')
+              Icon(
+                value ? Icons.check_box : Icons.check_box_outline_blank,
+                color: value ? terminalGreen : Colors.white30,
+                size: 20,
+              )
+            else if (type == 'select')
+              Text(
+                value,
+                style: const TextStyle(color: neonCyan, fontSize: 12),
+              ),
           ],
         ),
       ),

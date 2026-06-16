@@ -3,12 +3,14 @@ import 'terminal_controller.dart';
 import 'extension_controller.dart';
 import 'github_controller.dart';
 import 'editor_controller.dart';
+import 'settings_controller.dart';
 
 class HomeController extends ChangeNotifier {
   late final TerminalController terminal;
   late final ExtensionController extensions;
   late final GithubController github;
   late final EditorController editor;
+  late final SettingsController settings;
 
   int activeSidebarTab = 0;
   bool isSidebarOpen = true;
@@ -23,11 +25,13 @@ class HomeController extends ChangeNotifier {
       terminal.log,
       notifyListeners,
     );
+    settings = SettingsController(notifyListeners);
   }
 
   List<dynamic> get currentSidebarItems {
     if (activeSidebarTab == 1) return editor.modifiedFiles.values.toList();
     if (activeSidebarTab == 2) return extensions.items;
+    if (activeSidebarTab == 3) return settings.items;
     return github.sidebarItems;
   }
 
@@ -135,6 +139,17 @@ class HomeController extends ChangeNotifier {
   }
 
   void handleSidebarTap(dynamic item) {
+    if (activeSidebarTab == 3) {
+      if (item['action'] == 'minigame') settings.toggleMinigame();
+      if (item['action'] == 'active_editor') settings.toggleActiveEditor();
+      if (item['action'] == 'theme') {
+        final options = item['options'] as List<String>;
+        final currentIndex = options.indexOf(item['value']);
+        final nextIndex = (currentIndex + 1) % options.length;
+        settings.setTheme(options[nextIndex], editor.webViewController);
+      }
+      return;
+    }
     if (activeSidebarTab == 2) {
       extensions.toggle(item, editor.webViewController);
       return;
