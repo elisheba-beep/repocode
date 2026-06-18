@@ -40,13 +40,28 @@ class _TicTacToeGameState extends State<TicTacToeGame> {
     // AI Turn
     Future.delayed(const Duration(milliseconds: 500), () {
       if (!mounted) return;
-      List<int> empty = [];
-      for (int j = 0; j < 9; j++) {
-        if (_board[j] == '') empty.add(j);
+
+      int move = -1;
+      int? winMove = _findWinningMove('O');
+      int? blockMove = _findWinningMove('X');
+
+      if (winMove != null) {
+        move = winMove;
+      } else if (blockMove != null) {
+        move = blockMove;
+      } else if (_board[4] == '') {
+        move = 4; // Take center if available
+      } else {
+        List<int> empty = [];
+        for (int j = 0; j < 9; j++) {
+          if (_board[j] == '') empty.add(j);
+        }
+        if (empty.isNotEmpty) {
+          move = empty[math.Random().nextInt(empty.length)];
+        }
       }
 
-      if (empty.isNotEmpty) {
-        int move = empty[math.Random().nextInt(empty.length)];
+      if (move != -1) {
         setState(() {
           _board[move] = 'O';
           _playerTurn = true;
@@ -56,6 +71,8 @@ class _TicTacToeGameState extends State<TicTacToeGame> {
             const Duration(milliseconds: 500),
             _initGame,
           ); // AI Win
+        } else if (!_board.contains('')) {
+          Future.delayed(const Duration(milliseconds: 500), _initGame); // Draw
         }
       }
     });
@@ -75,9 +92,37 @@ class _TicTacToeGameState extends State<TicTacToeGame> {
     for (var l in lines) {
       if (_board[l[0]] == p && _board[l[1]] == p && _board[l[2]] == p) {
         return true;
-    }
       }
+    }
     return false;
+  }
+
+  int? _findWinningMove(String p) {
+    const lines = [
+      [0, 1, 2],
+      [3, 4, 5],
+      [6, 7, 8],
+      [0, 3, 6],
+      [1, 4, 7],
+      [2, 5, 8],
+      [0, 4, 8],
+      [2, 4, 6],
+    ];
+    for (var l in lines) {
+      int count = 0;
+      int? emptyIndex;
+      for (var i in l) {
+        if (_board[i] == p) {
+          count++;
+        } else if (_board[i] == '') {
+          emptyIndex = i;
+        }
+      }
+      if (count == 2 && emptyIndex != null) {
+        return emptyIndex;
+      }
+    }
+    return null;
   }
 
   @override
