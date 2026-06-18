@@ -41,7 +41,9 @@ class _TicTacToeGameState extends State<TicTacToeGame> {
     Future.delayed(const Duration(milliseconds: 500), () {
       if (!mounted) return;
       List<int> empty = [];
-      for (int j = 0; j < 9; j++) if (_board[j] == '') empty.add(j);
+      for (int j = 0; j < 9; j++) {
+        if (_board[j] == '') empty.add(j);
+      }
 
       if (empty.isNotEmpty) {
         int move = empty[math.Random().nextInt(empty.length)];
@@ -49,11 +51,12 @@ class _TicTacToeGameState extends State<TicTacToeGame> {
           _board[move] = 'O';
           _playerTurn = true;
         });
-        if (_checkWin('O'))
+        if (_checkWin('O')) {
           Future.delayed(
             const Duration(milliseconds: 500),
             _initGame,
           ); // AI Win
+        }
       }
     });
   }
@@ -69,9 +72,11 @@ class _TicTacToeGameState extends State<TicTacToeGame> {
       [0, 4, 8],
       [2, 4, 6],
     ];
-    for (var l in lines)
-      if (_board[l[0]] == p && _board[l[1]] == p && _board[l[2]] == p)
+    for (var l in lines) {
+      if (_board[l[0]] == p && _board[l[1]] == p && _board[l[2]] == p) {
         return true;
+    }
+      }
     return false;
   }
 

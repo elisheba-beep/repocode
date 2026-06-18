@@ -46,7 +46,7 @@ class TopNavigationBar extends StatelessWidget {
                 height: 28,
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.05),
+                  color: Colors.white.withValues(alpha:0.05),
                   border: Border.all(color: Colors.white10),
                   borderRadius: BorderRadius.circular(6),
                 ),
@@ -109,7 +109,7 @@ class TopNavigationBar extends StatelessWidget {
                   ),
                   _WindowControlButton(
                     icon: Icons.close,
-                    hoverColor: Colors.red.withOpacity(0.8),
+                    hoverColor: Colors.red.withValues(alpha:0.8),
                     onTap: () => windowManager.close(),
                   ),
                 ],
@@ -146,7 +146,7 @@ class _WindowControlButtonState extends State<_WindowControlButton> {
         child: Container(
           width: 46,
           height: 40,
-          color: isHovered ? (widget.hoverColor ?? Colors.white.withOpacity(0.1)) : Colors.transparent,
+          color: isHovered ? (widget.hoverColor ?? Colors.white.withValues(alpha:0.1)) : Colors.transparent,
           child: Icon(widget.icon, color: isHovered ? Colors.white : Colors.white54, size: 16),
         ),
       ),

@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import '../../theme/cyber_theme.dart';
 
 class ActiveEditorOverlay extends StatefulWidget {
   final VoidCallback onCoinTap;
@@ -15,7 +14,7 @@ class ActiveEditorOverlay extends StatefulWidget {
 class _ActiveEditorOverlayState extends State<ActiveEditorOverlay> {
   final math.Random _random = math.Random();
   Timer? _spawnTimer;
-  List<CoinData> _coins = [];
+  final List<CoinData> _coins = [];
 
   @override
   void initState() {

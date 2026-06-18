@@ -71,8 +71,9 @@ class _TetrisGameState extends State<TetrisGame> {
     ][math.Random().nextInt(4)];
     _px = 3;
     _py = 0;
-    if (_checkCollision(_px, _py, _piece))
+    if (_checkCollision(_px, _py, _piece)) {
       _initGame(); // Game over, auto-restart
+    }
   }
 
   bool _checkCollision(int nx, int ny, List<math.Point<int>> p) {
@@ -102,8 +103,9 @@ class _TetrisGameState extends State<TetrisGame> {
   void _checkLines() {
     for (int y = 0; y < tRows; y++) {
       bool full = true;
-      for (int x = 0; x < tCols; x++)
+      for (int x = 0; x < tCols; x++) {
         if (_board[y * tCols + x] == null) full = false;
+      }
       if (full) {
         _timer?.cancel();
         widget.onWin();
@@ -127,7 +129,9 @@ class _TetrisGameState extends State<TetrisGame> {
   }
 
   void _drop() {
-    while (!_checkCollision(_px, _py + 1, _piece)) _py++;
+    while (!_checkCollision(_px, _py + 1, _piece)) {
+      _py++;
+    }
     _tick();
   }
 

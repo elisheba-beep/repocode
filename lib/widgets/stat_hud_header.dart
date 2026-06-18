@@ -68,7 +68,7 @@ class StatHudHeader extends StatelessWidget {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: neonMagenta.withOpacity(0.2),
+              backgroundColor: neonMagenta.withValues(alpha:0.2),
               side: const BorderSide(color: neonMagenta),
             ),
             onPressed: () {
@@ -97,7 +97,7 @@ class StatHudHeader extends StatelessWidget {
         border: const Border(bottom: BorderSide(color: neonPurple, width: 2)),
         boxShadow: [
           BoxShadow(
-            color: neonPurple.withOpacity(0.4),
+            color: neonPurple.withValues(alpha:0.4),
             blurRadius: 12,
             offset: const Offset(0, 2),
           ),
@@ -143,7 +143,7 @@ class StatHudHeader extends StatelessWidget {
                   Text(
                     'Next Lvl: $commitsNeeded commits needed',
                     style: TextStyle(
-                      color: neonMagenta.withOpacity(0.8),
+                      color: neonMagenta.withValues(alpha:0.8),
 
                       fontSize: 10,
                     ),

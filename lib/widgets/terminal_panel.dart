@@ -63,7 +63,7 @@ class _TerminalPanelState extends State<TerminalPanel> {
                         child: SelectableText(
                           widget.logs[logIndex],
                           style: TextStyle(
-                            color: terminalGreen.withOpacity(0.8),
+                            color: terminalGreen.withValues(alpha: 0.8),
                             fontFamily: 'Courier',
                           ),
                         ),
@@ -79,7 +79,7 @@ class _TerminalPanelState extends State<TerminalPanel> {
                         controller: _controller,
                         focusNode: _focusNode,
                         style: TextStyle(
-                          color: terminalGreen.withOpacity(0.8),
+                          color: terminalGreen.withValues(alpha: 0.8),
                           fontFamily: 'Courier',
                         ),
                         decoration: const InputDecoration(
@@ -113,10 +113,11 @@ class CRTScanlinePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.white.withOpacity(0.03)
+      ..color = Colors.white.withValues(alpha: 0.03)
       ..strokeWidth = 1.0;
-    for (double i = 0; i < size.height; i += 4)
+    for (double i = 0; i < size.height; i += 4) {
       canvas.drawLine(Offset(0, i), Offset(size.width, i), paint);
+    }
   }
 
   @override

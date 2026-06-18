@@ -76,7 +76,10 @@ class EditorView extends StatelessWidget {
             height: 4,
             decoration: BoxDecoration(
               boxShadow: [
-                BoxShadow(color: neonCyan.withOpacity(0.6), blurRadius: 8),
+                BoxShadow(
+                  color: neonCyan.withValues(alpha: 0.6),
+                  blurRadius: 8,
+                ),
               ],
             ),
             child: LinearProgressIndicator(
@@ -281,12 +284,14 @@ class GridBackgroundPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = neonCyan.withOpacity(0.02)
+      ..color = neonCyan.withValues(alpha: 0.02)
       ..strokeWidth = 1.0;
-    for (double i = 0; i < size.width; i += 40)
+    for (double i = 0; i < size.width; i += 40) {
       canvas.drawLine(Offset(i, 0), Offset(i, size.height), paint);
-    for (double i = 0; i < size.height; i += 40)
+    }
+    for (double i = 0; i < size.height; i += 40) {
       canvas.drawLine(Offset(0, i), Offset(size.width, i), paint);
+    }
   }
 
   @override

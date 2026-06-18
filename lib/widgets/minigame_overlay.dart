@@ -53,12 +53,12 @@ class _MinigameOverlayState extends State<MinigameOverlay> {
     if (!_isVisible) return const SizedBox.shrink();
 
     Widget activeWidget;
-    if (_activeGame == 0)
+    if (_activeGame == 0) {
       activeWidget = MemoryMatchGame(onWin: _handleWin);
-    else if (_activeGame == 1)
-      activeWidget = TicTacToeGame(onWin: _handleWin);
+    } else if (_activeGame == 1)
+      {activeWidget = TicTacToeGame(onWin: _handleWin);}
     else
-      activeWidget = TetrisGame(onWin: _handleWin);
+      {activeWidget = TetrisGame(onWin: _handleWin);}
 
     return Container(
       color: Colors.black87,

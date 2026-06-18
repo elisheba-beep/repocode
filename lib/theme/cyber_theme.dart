@@ -19,8 +19,8 @@ TextStyle glowingText(
     fontWeight: weight,
     fontFamily: 'Courier',
     shadows: [
-      Shadow(color: color.withOpacity(0.8), blurRadius: 8),
-      Shadow(color: color.withOpacity(0.4), blurRadius: 16),
+      Shadow(color: color.withValues(alpha: 0.8), blurRadius: 8),
+      Shadow(color: color.withValues(alpha: 0.4), blurRadius: 16),
     ],
   );
 }
@@ -31,11 +31,15 @@ BoxDecoration glowingBox(
   bool isBorder = true,
 }) {
   return BoxDecoration(
-    color: isBorder ? cyberPanel : color.withOpacity(opacity),
+    color: isBorder ? cyberPanel : color.withValues(alpha: opacity),
     border: isBorder ? Border.all(color: color, width: 1.5) : null,
     borderRadius: BorderRadius.circular(4),
     boxShadow: [
-      BoxShadow(color: color.withOpacity(0.3), blurRadius: 10, spreadRadius: 1),
+      BoxShadow(
+        color: color.withValues(alpha: 0.3),
+        blurRadius: 10,
+        spreadRadius: 1,
+      ),
     ],
   );
 }

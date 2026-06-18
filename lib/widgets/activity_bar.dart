@@ -67,17 +67,17 @@ class ActivityBar extends StatelessWidget {
             border: isActive
                 ? Border(left: BorderSide(color: color, width: 3))
                 : null,
-            color: isActive ? color.withOpacity(0.1) : Colors.transparent,
+            color: isActive ? color.withValues(alpha:0.1) : Colors.transparent,
           ),
           child: Stack(
             clipBehavior: Clip.none,
             children: [
               Icon(
                 icon,
-                color: isActive ? color : color.withOpacity(0.5),
+                color: isActive ? color : color.withValues(alpha:0.5),
                 size: 24,
                 shadows: isActive
-                    ? [Shadow(color: color.withOpacity(0.8), blurRadius: 10)]
+                    ? [Shadow(color: color.withValues(alpha:0.8), blurRadius: 10)]
                     : [],
               ),
               if (badgeCount > 0)
